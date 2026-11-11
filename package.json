@@ -1,0 +1,19 @@
+{
+  "name": "shadercraft",
+  "version": "1.0.0",
+  "description": "ShaderCraft Studio — Minecraft 3D Web Multijugador + jpshadereditorInclude (1-Buffer Shaders)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "deploy:ftp": "node deploy_scripts/upload_ftp.js"
+  },
+  "dependencies": {
+    "basic-ftp": "^5.0.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
+

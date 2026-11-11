@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShaderCraft Studio — Minecraft 3D Multijugador + JPShaderEditor 1-Buffer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- CONTENEDOR DEL MOTOR 3D THREE.JS -->
+    <div id="viewport-container"></div>
+
+    <!-- MIRA CENTRAL (MODO JUEGO) -->
+    <div id="crosshair" class="crosshair"></div>
+
+    <!-- NOTIFICACIONES TOAST (+1 Cubo agarrado, jugador conectado, cambios de shader, etc.) -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- BARRA SUPERIOR DE ESTUDIO -->
+    <header class="top-studio-bar">
+        <div class="brand-group">
+            <div class="brand-logo">⛏️</div>
+            <div class="brand-titles">
+                <h1>SHADERCRAFT 3D</h1>
+                <span>Minecraft Multiplayer · 1-Buffer Shaders</span>
+            </div>
+        </div>
+
+        <!-- SELECTOR DE MODO: MODO USUARIO (JUEGO 3D) vs MODO DIOS (DESDE ARRIBA) -->
+        <div class="mode-switcher">
+            <button id="btn-mode-user" class="mode-btn active" title="Modo Juego 3D: Moverse con el personaje, picar con el pico y agarrar cubos (Tecla Tab o G)">
+                🎮 MODO JUEGO (3D)
+            </button>
+            <button id="btn-mode-god" class="mode-btn" title="Modo Dios: Poner y pintar cubitos desde arriba, subir y bajar con E y Q (Tecla Tab o G)">
+                ⚡ MODO DIOS (Desde Arriba)
+            </button>
+        </div>
+
+        <!-- SUBCONTROLES Y ACCIONES DE ESTUDIO -->
+        <div class="top-actions-group">
+            <!-- ESTADO MULTIJUGADOR EN TIEMPO REAL -->
+            <div class="multiplayer-bar" title="Sincronización Multijugador en tiempo real por Sockets">
+                <span id="mp-status-dot" class="mp-dot"></span>
+                <span id="mp-online-label" class="mp-online-label">1 Online</span>
+                <input type="text" id="input-mp-nickname" class="mp-nickname-input" maxlength="18" placeholder="Tu Nombre" spellcheck="false" title="Tu nombre en el servidor multijugador">
+            </div>
+
+            <div id="user-subcontrols" class="user-subcontrols">
+                <button id="btn-toggle-cam" class="studio-btn" title="Alternar entre 1ª Persona y 3ª Persona viendo al personaje con el pico (Tecla V)">
+                    👁️ 3ª Persona [V]
+                </button>
+                <button id="btn-toggle-fly" class="studio-btn" title="Alternar entre Caminar con gravedad y Desplazamiento Libre 3D / Vuelo (Tecla F)">
+                    🚶 Caminar [F]
+                </button>
+            </div>
+
+            <button id="btn-open-inventory" class="studio-btn inventory-btn" title="Abrir Inventario de Bloques, Colores y Shaders 1-Buffer (Tecla I o E)">
+                🎒 Inventario [I]
+            </button>
+
+            <button id="btn-open-biome" class="studio-btn primary-biome" title="Abrir Creador de Bioma Amplio: Decidir qué textura o shader tiene el pasto, la piedra, la madera y generar Mini-Mundos (Tecla B)">
+                🌍 Crear Bioma [B]
+            </button>
+
+            <button id="btn-toggle-sidebar" class="studio-btn accent-shader" title="Abrir Panel de Color Sólido y Shaders 1-Buffer de jpshadereditorInclude (Tecla C)">
+                🎨 Color &amp; Shaders [C]
+            </button>
+
+            <button id="btn-export-world" class="studio-btn" title="Exportar y guardar este Mundo en JSON">
+                💾 Guardar
+            </button>
+            <button id="btn-import-world" class="studio-btn" title="Cargar un Mundo desde archivo JSON">
+                📂 Cargar
+            </button>
+            <input type="file" id="input-import-world" class="visually-hidden-input" accept=".json">
+
+            <button id="btn-toggle-audio" class="studio-btn" title="Activar / Silenciar efectos de sonido">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- SUGERENCIA DE CAPTURA DE RATÓN EN MODO JUEGO -->
+    <div id="pointerlock-hint" class="pointerlock-hint">
+        <span>🖱️ Podés rotar arrastrando el mouse o</span>
+        <button id="btn-lock-mouse" class="btn-mini-ghost btn-capture-mouse">
+            Capturar Mouse 360°
+        </button>
+    </div>
+
+    <!-- BARRA DE HERRAMIENTAS FLOTANTE DE MODO DIOS (DESDE ARRIBA) -->
+    <div id="god-toolbar" class="god-toolbar">
+        <div class="god-group">
+            <span class="god-group-lbl">Acción</span>
+            <button class="god-tool-btn active" data-god-tool="place" title="Poner cubitos desde arriba con el Color o Shader 1-Buffer elegido">➕ Poner Cubos</button>
+            <button class="god-tool-btn" data-god-tool="paint" title="Pintar cubos existentes con el Color o Shader activo">🎨 Pintar Bloque</button>
+            <button class="god-tool-btn" data-god-tool="erase" title="Borrar cubitos desde arriba">⛏️ Borrar</button>
+            <button class="god-tool-btn" data-god-tool="pick" title="Cuentagotas: copiar color o shader de un cubo (Alt+Click)">💧 Pipeta</button>
+            <button class="god-tool-btn" data-god-tool="teleport" title="Mover tu personaje a la posición donde hagas click">🚶 Llevar Personaje</button>
+        </div>
+
+        <div class="god-group">
+            <span class="god-group-lbl">Altura (Q / E)</span>
+            <button id="btn-god-down-q" class="god-tool-btn" title="Bajar cámara / altura en Modo Dios (Tecla Q)">⬇ Bajar [Q]</button>
+            <button id="btn-god-up-e" class="god-tool-btn" title="Subir cámara / altura en Modo Dios (Tecla E)">⬆ Subir [E]</button>
+            <span id="god-height-readout" class="god-height-badge">Y: 6</span>
+        </div>
+
+        <div class="god-group">
+            <span class="god-group-lbl">Tamaño</span>
+            <button class="god-tool-btn active" data-god-size="1">1×1</button>
+            <button class="god-tool-btn" data-god-size="2">2×2</button>
+            <button class="god-tool-btn" data-god-size="3">3×3</button>
+            <button class="god-tool-btn" data-god-size="column">Torre 4×</button>
+        </div>
+
+        <div class="god-group">
+            <span class="god-group-lbl">Vista</span>
+            <button class="god-tool-btn" data-god-cam="top" title="Vista Cenital 90° desde arriba">📐 Cenital 90°</button>
+            <button class="god-tool-btn" data-god-cam="iso" title="Vista Isométrica 45°">🧊 Isométrica</button>
+            <button class="god-tool-btn" data-god-cam="close" title="Acercar cámara">🔍 Cerca</button>
+        </div>
+
+        <div class="god-group">
+            <label class="god-lock-y-wrap" title="Fijar altura Y para construir pisos flotantes desde arriba">
+                <input type="checkbox" id="chk-god-lock-y">
+                <span>Fijar Capa Y:</span>
+                <input type="number" id="num-god-lock-y" value="4" min="-10" max="50">
+            </label>
+        </div>
+    </div>
+
+    <!-- PANEL LATERAL DERECHO: ELEGIR COLOR SÓLIDO O SHADER 1-BUFFER DE JPSHADEREDITOR INCLUDE -->
+    <aside id="studio-sidebar" class="studio-sidebar">
+        <div class="sidebar-header">
+            <h3>🎨 PINCEL: COLOR &amp; SHADERS 1-BUFFER</h3>
+            <button id="btn-close-sidebar" class="btn-icon-close" title="Cerrar panel (Tecla C)">✕</button>
+        </div>
+
+        <!-- Selector de a qué cosa le estamos aplicando el Color o Shader -->
+        <div class="target-selector-box">
+            <div class="target-selector-row">
+                <label for="select-assign-target">Aplicar a:</label>
+                <select id="select-assign-target">
+                    <option value="brush">🖌️ Cubo Pincel (Para poner cubitos)</option>
+                    <option value="grass">🌿 Bioma: Pasto (Piso)</option>
+                    <option value="stone">🪨 Bioma: Piedra (Roca)</option>
+                    <option value="wood">🪵 Bioma: Madera (Árboles)</option>
+                    <option value="leaves">🍃 Bioma: Hojas (Copa de Árbol)</option>
+                    <option value="dirt">🟫 Bioma: Tierra (Subsuelo)</option>
+                    <option value="water">💧 Bioma: Agua / Cristal</option>
+                    <option value="sand">🏖️ Bioma: Arena / Orilla</option>
+                    <option value="sky">🌌 Bioma: Cielo / Fondo</option>
+                </select>
+            </div>
+            <div id="active-target-summary" class="active-target-summary"></div>
+        </div>
+
+        <!-- Pestañas: 1) Color Sólido / Voxel  2) Shaders 1-Buffer de jpshadereditorInclude -->
+        <div class="studio-main-tabs">
+            <button class="studio-tab-btn active" data-studio-tab="color">🎨 Color Sólido / Voxel</button>
+            <button class="studio-tab-btn" data-studio-tab="shader">✨ Shaders 1-Buffer</button>
+        </div>
+
+        <!-- PESTAÑA 1: COLOR SÓLIDO Y PATRONES VOXEL -->
+        <div id="studio-pane-color" class="studio-pane">
+            <span class="section-label">Elegir Color del Cubo</span>
+            <div class="color-picker-row">
+                <input type="color" id="input-solid-color" value="#38bdf8">
+                <input type="text" id="input-hex-text" value="#38BDF8" maxlength="7" spellcheck="false">
+            </div>
+
+            <span class="section-label">Paleta Rápida Minecraft &amp; Neón</span>
+            <div id="color-swatches-grid" class="color-swatches-grid"></div>
+
+            <span class="section-label">Acabado / Textura sobre el Color</span>
+            <div class="pattern-grid">
+                <button class="pattern-btn active" data-voxel-pattern="solid">🟦 Sólido Puro</button>
+                <button class="pattern-btn" data-voxel-pattern="brick">🧱 Ladrillos</button>
+                <button class="pattern-btn" data-voxel-pattern="stone">🪨 Roca / Piedra</button>
+                <button class="pattern-btn" data-voxel-pattern="wood">🪵 Vetas de Madera</button>
+                <button class="pattern-btn" data-voxel-pattern="grass">🌿 Pasto Pixel</button>
+                <button class="pattern-btn" data-voxel-pattern="leaves">🍃 Follaje Hojas</button>
+                <button class="pattern-btn" data-voxel-pattern="crystal">💎 Cristal Brillo</button>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: CATÁLOGO FILTRADO DE SHADERS 1-BUFFER (JPSHADEREDITOR INCLUDE) -->
+        <div id="studio-pane-shader" class="studio-pane">
+            <div class="jpsi-top-bar">
+                <span id="jpsi-connection-pill">✦ jpshadereditor · 1-Buffer…</span>
+                <button id="btn-jpsi-srv-toggle" class="btn-mini-ghost" title="Alternar entre VPS público y localhost:3250">VPS/Local</button>
+            </div>
+
+            <div class="jpsi-subtabs">
+                <button class="jpsi-subtab active" data-jpsi-tab="shaders">GALERÍA 1-BUFFER (<span id="cnt-tab-shaders">…</span>)</button>
+                <button class="jpsi-subtab" data-jpsi-tab="builtins">LOCALES 1-BUFFER (<span id="cnt-tab-builtins">8</span>)</button>
+            </div>
+
+            <input type="search" id="input-shader-search" class="shader-search-input" placeholder="🔍 Buscar shader de 1 buffer…" autocomplete="off" spellcheck="false">
+
+            <!-- Grilla de Shaders 1-Buffer con miniaturas R2 y preview WebGL en vivo -->
+            <div id="shader-catalog-grid" class="shader-catalog-grid"></div>
+
+            <!-- Sliders de Uniforms en vivo para el shader seleccionado -->
+            <div id="active-shader-uniforms" class="active-shader-uniforms"></div>
+        </div>
+    </aside>
+
+    <!-- MODAL: INVENTARIO ESTILO MINECRAFT (BLOQUES, COLORES Y SHADERS 1-BUFFER) -->
+    <div id="inventory-modal-backdrop" class="biome-modal-backdrop">
+        <div class="biome-modal-card inventory-modal-card">
+            <div class="biome-modal-header">
+                <h2>🎒 INVENTARIO DEL JUGADOR — EQUIPAR EN BARRA RÁPIDA (HOTBAR)</h2>
+                <button id="btn-close-inventory" class="btn-icon-close" title="Cerrar Inventario (Tecla I o Esc)">✕</button>
+            </div>
+
+            <div class="inventory-modal-body">
+                <div class="inventory-top-controls">
+                    <div class="inventory-tabs">
+                        <button class="inv-tab-btn active" data-inv-tab="all">📦 Todos los Cubos</button>
+                        <button class="inv-tab-btn" data-inv-tab="biome">🌿 Bloques del Bioma</button>
+                        <button class="inv-tab-btn" data-inv-tab="shaders">✨ Cubos Shader (1-Buffer)</button>
+                        <button class="inv-tab-btn" data-inv-tab="colors">🎨 Cubos de Color</button>
+                    </div>
+
+                    <div class="inventory-slot-target">
+                        <span>Equipar en Slot de Hotbar:</span>
+                        <select id="select-inv-target-slot">
+                            <option value="auto">Automático (Slot Activo)</option>
+                            <option value="1">Tecla [2] · Slot 2</option>
+                            <option value="2">Tecla [3] · Slot 3</option>
+                            <option value="3">Tecla [4] · Slot 4</option>
+                            <option value="4">Tecla [5] · Slot 5</option>
+                            <option value="5">Tecla [6] · Slot 6</option>
+                            <option value="6">Tecla [7] · Slot 7</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Grilla de ítems del inventario -->
+                <div id="inventory-items-grid" class="inventory-items-grid"></div>
+
+                <!-- Vista previa de la Hotbar actual dentro del Inventario -->
+                <div class="inventory-hotbar-preview-wrap">
+                    <span class="section-label">Tu Barra Rápida Actual (Hacé click en un slot para elegir dónde equipar)</span>
+                    <div id="inventory-hotbar-strip" class="inventory-hotbar-strip"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INTERFAZ DE CREACIÓN DE BIOMA AMPLIO -->
+    <div id="biome-modal-backdrop" class="biome-modal-backdrop">
+        <div class="biome-modal-card">
+            <div class="biome-modal-header">
+                <h2>🌍 ESTUDIO DE CREACIÓN DE BIOMA — MUNDOS AMPLIOS MULTIJUGADOR</h2>
+                <button id="btn-close-biome" class="btn-icon-close" title="Cerrar (Esc o B)">✕</button>
+            </div>
+
+            <div class="biome-modal-body">
+                <!-- Columna 1: Qué textura, color o shader tiene cada elemento del bioma -->
+                <div>
+                    <div class="biome-col-title">1. Apariencia de cada Elemento del Bioma</div>
+                    <p class="biome-col-desc">
+                        Elegí qué textura voxel, color sólido o shader 1-Buffer de <b>jpshadereditorInclude</b> tiene el pasto, la piedra, la madera, las hojas y el cielo. Se sincroniza con todos los jugadores.
+                    </p>
+                    <div id="biome-elements-list" class="biome-elements-list"></div>
+                </div>
+
+                <!-- Columna 2: Parámetros del Generador de Terreno y Árboles -->
+                <div>
+                    <div class="biome-col-title">2. Estructura y Escala del Mundo</div>
+                    <p class="biome-col-desc">
+                        Configurá el relieve, tamaño del bioma amplio, cantidad de árboles, piedra y lagunas para generar un nuevo mundo compartido.
+                    </p>
+
+                    <span class="section-label">Preset de Bioma</span>
+                    <div class="biome-presets-grid">
+                        <button class="biome-preset-btn active" data-biome-preset="forest">🌲 Bosque Clásico</button>
+                        <button class="biome-preset-btn" data-biome-preset="mountains">⛰️ Montañas Rocosas</button>
+                        <button class="biome-preset-btn" data-biome-preset="floating">🏝️ Islas Flotantes</button>
+                        <button class="biome-preset-btn" data-biome-preset="canyon">🏜️ Cañón / Mesetas</button>
+                        <button class="biome-preset-btn" data-biome-preset="shader_world">🌈 Bioma Shader Viva</button>
+                        <button class="biome-preset-btn" data-biome-preset="flat">🧱 Plataforma Plana</button>
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label for="biome-select-size"><span>Tamaño del Bioma</span></label>
+                        <select id="biome-select-size">
+                            <option value="48">48 × 48 cubos (Bioma Mediano — 2.300 m²)</option>
+                            <option value="64" selected>64 × 64 cubos (Bioma Grande Estándar — 4.096 m²)</option>
+                            <option value="80">80 × 80 cubos (Bioma Muy Amplio — 6.400 m²)</option>
+                            <option value="96">96 × 96 cubos (Mundo Gigante — 9.216 m²)</option>
+                        </select>
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label><span>Altura de Colinas y Montañas</span> <b id="val-biome-hills">8</b></label>
+                        <input type="range" id="biome-slider-hills" min="2" max="16" step="1" value="8">
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label><span>Densidad de Árboles (Madera y Hojas)</span> <b id="val-biome-trees">55%</b></label>
+                        <input type="range" id="biome-slider-trees" min="0" max="1" step="0.05" value="0.55">
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label><span>Afloramientos de Piedra y Rocas</span> <b id="val-biome-stone">45%</b></label>
+                        <input type="range" id="biome-slider-stone" min="0" max="1" step="0.05" value="0.45">
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label><span>Nivel de Agua / Lagunas</span> <b id="val-biome-water">2</b></label>
+                        <input type="range" id="biome-slider-water" min="0" max="6" step="1" value="2">
+                    </div>
+
+                    <div class="biome-param-row">
+                        <label><span>Semilla del Mundo (Seed)</span></label>
+                        <div class="seed-row">
+                            <input type="number" id="biome-input-seed" value="12345">
+                            <button id="btn-random-seed" class="studio-btn">🎲 Azar</button>
+                        </div>
+                    </div>
+
+                    <div class="biome-cta-group">
+                        <button id="btn-generate-biome" class="btn-generate-big">
+                            ⚡ GENERAR NUEVO BIOMA AMPLIO AHORA
+                        </button>
+                        <div class="biome-Quick-actions">
+                            <button id="btn-randomize-biome-shaders" class="studio-btn accent-shader">
+                                ✨ Asignar Shaders 1-Buffer al Azar
+                            </button>
+                            <button id="btn-reset-classic-biome" class="studio-btn">
+                                🌿 Texturas Clásicas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELEMETRÍA ABAJO A LA IZQUIERDA -->
+    <div class="bottom-left-telemetry">
+        <div class="telemetry-pill">
+            <span id="hud-fps">60 FPS</span>
+            <span>·</span>
+            <span id="hud-coords">XYZ: 0, 5, 0</span>
+        </div>
+    </div>
+
+    <!-- HUD INFERIOR: HOTBAR DE HERRAMIENTAS (PICO + BLOQUES + PINCEL) Y AYUDA -->
+    <div class="bottom-hud-wrap">
+        <div id="hotbar-container" class="hotbar-container"></div>
+        <div id="controls-footer-hint" class="controls-footer-hint"></div>
+    </div>
+
+    <!-- CONFIGURACIÓN Y LIBRERÍAS CORE -->
+    <script src="js/config.js"></script>
+    <script src="js/lib/socket.io.min.js"></script>
+    <script src="js/lib/three.min.js"></script>
+    <script src="js/jpshader/jp-pointers.js"></script>
+    <script src="js/jpshader/uniform-types.js"></script>
+    <script src="js/jpshader/jp-node-graph.js"></script>
+    <script src="js/jpshader/webglrenderer.js"></script>
+
+    <!-- MÓDULOS DEL JUEGO SHADERCRAFT STUDIO -->
+    <script src="js/sound.js"></script>
+    <script src="js/shader-hub.js"></script>
+    <script src="js/materials.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/god-mode.js"></script>
+    <script src="js/multiplayer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

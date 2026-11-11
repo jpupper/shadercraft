@@ -1,0 +1,1498 @@
+/* ============================================================================
+   JP VOXELCRAFT STUDIO — MINECRAFT WEB + JPSHADEREDITOR INCLUDE
+   Diseño de Interfaz Profesional (Dark Glassmorphism Studio + Voxel HUD)
+   ============================================================================ */
+
+:root {
+    --bg-glass: rgba(11, 15, 25, 0.84);
+    --bg-glass-strong: rgba(8, 11, 20, 0.94);
+    --bg-card: rgba(20, 27, 45, 0.85);
+    --bg-card-hover: rgba(30, 41, 68, 0.95);
+    --border-subtle: rgba(148, 163, 184, 0.18);
+    --border-highlight: rgba(56, 189, 248, 0.65);
+    --accent-cyan: #38bdf8;
+    --accent-purple: #a855f7;
+    --accent-green: #22c55e;
+    --accent-amber: #f59e0b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #090d16;
+    font-family: var(--font-sans);
+    color: var(--text-main);
+}
+
+#viewport-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
+
+#viewport-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================================================
+   BARRA SUPERIOR DE ESTUDIO (MODO JUEGO / MODO DIOS / CREADOR DE BIOMA)
+   ============================================================================ */
+.top-studio-bar {
+    position: fixed;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    height: 52px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 14px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+}
+
+.brand-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #22c55e 0%, #0ea5e9 55%, #a855f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+
+.brand-titles h1 {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    background: linear-gradient(90deg, #ffffff, #7dd3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brand-titles span {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* Selector Central: Modo Usuario (Juego) vs Modo Dios (Desde Arriba) */
+.mode-switcher {
+    display: flex;
+    align-items: center;
+    background: rgba(6, 9, 16, 0.8);
+    padding: 4px;
+    border-radius: 11px;
+    border: 1px solid var(--border-subtle);
+    gap: 4px;
+}
+
+.mode-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 7px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mode-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+}
+
+#btn-mode-god.active {
+    background: linear-gradient(135deg, #9333ea, #ec4899);
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.45);
+}
+
+/* Subcontroles de Modo Juego y AccionesDerecha */
+.top-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-subcontrols {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.studio-btn {
+    border: 1px solid var(--border-subtle);
+    background: rgba(30, 41, 59, 0.72);
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.studio-btn:hover {
+    background: rgba(51, 65, 85, 0.9);
+    border-color: var(--accent-cyan);
+    transform: translateY(-1px);
+}
+
+.studio-btn.active {
+    background: rgba(14, 165, 233, 0.25);
+    border-color: var(--accent-cyan);
+    color: #7dd3fc;
+}
+
+.studio-btn.primary-biome {
+    background: linear-gradient(135deg, #16a34a, #059669);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.32);
+}
+
+.studio-btn.primary-biome:hover {
+    filter: brightness(1.1);
+}
+
+.studio-btn.accent-shader {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(56, 189, 248, 0.28));
+    border-color: rgba(168, 85, 247, 0.55);
+}
+
+/* ============================================================================
+   BARRA FLOTANTE DE MODO DIOS (HERRAMIENTAS DESDE ARRIBA)
+   ============================================================================ */
+.god-toolbar {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 95;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    flex-wrap: wrap;
+}
+
+.god-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-right: 10px;
+    border-right: 1px solid var(--border-subtle);
+}
+
+.god-group:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+.god-group-lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-right: 4px;
+    font-weight: 700;
+}
+
+.god-tool-btn {
+    border: 1px solid transparent;
+    background: rgba(30, 41, 59, 0.65);
+    color: #cbd5e1;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.god-tool-btn:hover {
+    background: rgba(51, 65, 85, 0.9);
+    color: #fff;
+}
+
+.god-tool-btn.active {
+    background: rgba(168, 85, 247, 0.32);
+    border-color: #c084fc;
+    color: #f3e8ff;
+}
+
+.god-lock-y-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: #cbd5e1;
+}
+
+.god-lock-y-wrap input[type="number"] {
+    width: 48px;
+    background: #0f172a;
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+}
+
+/* ============================================================================
+   PANEL LATERAL DERECHO: COLOR SÓLIDO & SHADERS DE JPSHADEREDITOR INCLUDE
+   ============================================================================ */
+.studio-sidebar {
+    position: fixed;
+    top: 74px;
+    right: 14px;
+    bottom: 92px;
+    width: 370px;
+    z-index: 98;
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    box-shadow: -8px 12px 36px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.studio-sidebar.collapsed {
+    transform: translateX(400px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-header h3 {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-icon-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 4px 7px;
+    border-radius: 6px;
+}
+
+.btn-icon-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* Selector de Destino (Cubo Pincel vs Elementos del Bioma) */
+.target-selector-box {
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.75);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.target-selector-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.target-selector-row label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.target-selector-row select {
+    flex: 1;
+    background: #090d16;
+    color: #f8fafc;
+    border: 1px solid var(--border-highlight);
+    border-radius: 8px;
+    padding: 6px 9px;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+}
+
+.active-target-summary {
+    margin-top: 7px;
+    font-size: 11.5px;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.badge-shader {
+    background: linear-gradient(90deg, #9333ea, #0284c7);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+/* Tabs del Estudio: Color Sólido vs Shaders jpshadereditorInclude */
+.studio-main-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 8px 14px 0;
+    gap: 6px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.studio-tab-btn {
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-radius: 9px 9px 0 0;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.studio-tab-btn.active {
+    background: rgba(30, 41, 68, 0.95);
+    color: #fff;
+    border-color: var(--border-highlight);
+}
+
+/* Pane 1: Color Sólido y Patrones Voxel */
+.studio-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.color-picker-row input[type="color"] {
+    width: 52px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.color-picker-row input[type="text"] {
+    flex: 1;
+    background: #090d16;
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.color-swatches-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px;
+    margin-bottom: 18px;
+}
+
+.color-swatch {
+    height: 30px;
+    border-radius: 7px;
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    cursor: pointer;
+    transition: transform 0.12s, border-color 0.12s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    border-color: #ffffff;
+}
+
+.pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
+}
+
+.pattern-btn {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: #cbd5e1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.14s;
+}
+
+.pattern-btn:hover {
+    background: var(--bg-card-hover);
+    color: #fff;
+}
+
+.pattern-btn.active {
+    border-color: var(--accent-cyan);
+    background: rgba(14, 165, 233, 0.22);
+    color: #7dd3fc;
+}
+
+/* Pane 2: Catálogo en Vivo de Shaders (jpshadereditorInclude) */
+#studio-pane-shader {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.jpsi-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: #e9d5ff;
+}
+
+.btn-mini-ghost {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
+    color: #cbd5e1;
+    font-size: 10.5px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-mini-ghost:hover {
+    border-color: var(--accent-cyan);
+    color: #fff;
+}
+
+.jpsi-subtabs {
+    display: flex;
+    gap: 4px;
+}
+
+.jpsi-subtab {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 6px 4px;
+    border-radius: 7px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.jpsi-subtab.active {
+    background: rgba(168, 85, 247, 0.28);
+    border-color: #c084fc;
+    color: #fff;
+}
+
+.shader-search-input {
+    width: 100%;
+    background: #090d16;
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    padding: 8px 11px;
+    border-radius: 8px;
+    font-size: 12px;
+    outline: none;
+}
+
+.shader-search-input:focus {
+    border-color: var(--accent-purple);
+}
+
+.shader-catalog-grid {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: max-content;
+    gap: 8px;
+    padding-right: 4px;
+    align-content: start;
+}
+
+.shader-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 118px;
+}
+
+.shader-card:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.shader-card.selected {
+    border: 2px solid #c084fc;
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
+}
+
+.shader-card-thumb {
+    position: relative;
+    width: 100%;
+    height: 78px;
+    min-height: 78px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #1e1b4b, #0f172a);
+    overflow: hidden;
+}
+
+.shader-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.shader-hover-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.shader-thumb-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #c084fc;
+    font-weight: 700;
+}
+
+.shader-card-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(9, 13, 22, 0.82);
+    color: #7dd3fc;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.shader-card-info {
+    padding: 6px 8px;
+}
+
+.shader-card-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shader-card-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Sliders de Uniforms en vivo para el shader activo */
+.active-shader-uniforms {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 8px;
+    max-height: 155px;
+    overflow-y: auto;
+}
+
+.uniforms-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: #c084fc;
+    margin-bottom: 6px;
+}
+
+.uniform-slider-item {
+    margin-bottom: 6px;
+}
+
+.uniform-slider-item label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-family: var(--font-mono);
+    color: #cbd5e1;
+    margin-bottom: 2px;
+}
+
+.uniform-slider-item input[type="range"] {
+    width: 100%;
+    accent-color: #c084fc;
+}
+
+/* ============================================================================
+   MODAL / INTERFAZ DE CREACIÓN DE BIOMA ("MINI-MUNDOS ASÍ A LO MINECRAFT")
+   ============================================================================ */
+.biome-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(5, 8, 15, 0.76);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.biome-modal-backdrop.open {
+    display: flex;
+}
+
+.biome-modal-card {
+    width: min(1040px, 96vw);
+    max-height: 90vh;
+    background: var(--bg-glass-strong);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.biome-modal-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(90deg, rgba(22, 163, 74, 0.16), rgba(14, 165, 233, 0.12));
+}
+
+.biome-modal-header h2 {
+    font-size: 17px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.biome-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 22px;
+}
+
+@media (max-width: 860px) {
+    .biome-modal-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+.biome-col-title {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #7dd3fc;
+    margin-bottom: 6px;
+}
+
+.biome-col-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.45;
+}
+
+.biome-elements-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+}
+
+.biome-element-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 11px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.biome-el-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.biome-el-preview {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+    image-rendering: pixelated;
+}
+
+.biome-el-title-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.biome-el-title-wrap h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.biome-el-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.biome-el-color {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.biome-el-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-el-mode {
+    flex: 1;
+    border: 1px solid var(--border-subtle);
+    background: rgba(15, 23, 42, 0.7);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.14s;
+}
+
+.btn-el-mode:hover {
+    border-color: var(--accent-cyan);
+    color: #fff;
+}
+
+.btn-el-mode.active {
+    background: rgba(56, 189, 248, 0.24);
+    border-color: var(--accent-cyan);
+    color: #7dd3fc;
+}
+
+/* Columna Derecha del Creador de Bioma: Parámetros y Generador */
+.biome-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.biome-preset-btn {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: #e2e8f0;
+    padding: 9px 11px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+}
+
+.biome-preset-btn:hover {
+    background: var(--bg-card-hover);
+}
+
+.biome-preset-btn.active {
+    background: rgba(34, 197, 94, 0.22);
+    border-color: #4ade80;
+    color: #86efac;
+}
+
+.biome-param-row {
+    margin-bottom: 12px;
+}
+
+.biome-param-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+}
+
+.biome-param-row input[type="range"] {
+    width: 100%;
+    accent-color: #22c55e;
+}
+
+.biome-param-row select,
+.biome-param-row input[type="number"] {
+    width: 100%;
+    background: #090d16;
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.seed-row {
+    display: flex;
+    gap: 8px;
+}
+
+.biome-cta-group {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.btn-generate-big {
+    width: 100%;
+    border: none;
+    background: linear-gradient(135deg, #22c55e, #0ea5e9);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 13px 18px;
+    border-radius: 11px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.35);
+    transition: transform 0.15s, filter 0.15s;
+}
+
+.btn-generate-big:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.biome-Quick-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.biome-Quick-actions button {
+    flex: 1;
+}
+
+/* ============================================================================
+   HUD INFERIOR: HOTBAR MINECRAFT, MIRA (CROSSHAIR), PILLS DE COORDENADAS Y TOASTS
+   ============================================================================ */
+.crosshair {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px;
+    height: 22px;
+    z-index: 40;
+    pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.85);
+}
+
+.crosshair::before {
+    top: 10px;
+    left: 3px;
+    width: 16px;
+    height: 2px;
+}
+
+.crosshair::after {
+    top: 3px;
+    left: 10px;
+    width: 2px;
+    height: 16px;
+}
+
+.bottom-hud-wrap {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+}
+
+.hotbar-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.hotbar-slot {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    border-radius: 10px;
+    background: rgba(20, 27, 45, 0.78);
+    border: 2px solid rgba(148, 163, 184, 0.22);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    transition: all 0.14s ease;
+}
+
+.hotbar-slot:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.hotbar-slot.active {
+    border-color: var(--accent-cyan);
+    background: rgba(14, 165, 233, 0.24);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+    transform: translateY(-3px);
+}
+
+.hotbar-key {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 9.5px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.hotbar-count {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    font-size: 9.5px;
+    font-family: var(--font-mono);
+    color: #fde047;
+    font-weight: 800;
+}
+
+.hotbar-emoji {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.hotbar-tex-icon,
+.hotbar-color-box {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    background-size: cover;
+    image-rendering: pixelated;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.hotbar-label {
+    font-size: 9.5px;
+    color: #cbd5e1;
+    font-weight: 600;
+    max-width: 52px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.controls-footer-hint {
+    background: rgba(9, 13, 22, 0.78);
+    border: 1px solid var(--border-subtle);
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 11px;
+    color: #cbd5e1;
+    white-space: nowrap;
+}
+
+.controls-footer-hint kbd {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+/* Telemetría abajo a la izquierda */
+.bottom-left-telemetry {
+    position: fixed;
+    bottom: 14px;
+    left: 14px;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.telemetry-pill {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pointerlock-hint {
+    position: fixed;
+    top: 74px;
+    left: 14px;
+    z-index: 90;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 11px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #cbd5e1;
+}
+
+/* Notificaciones Toast */
+.toast-container {
+    position: fixed;
+    top: 78px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 250;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+}
+
+.voxel-toast {
+    background: rgba(15, 23, 42, 0.94);
+    border: 1px solid var(--accent-cyan);
+    color: #f8fafc;
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 12.5px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.voxel-toast.fade-out {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+
+/* ============================================================================
+   CLASES UTILITARIAS Y SINCRONIZACIÓN MULTIJUGADOR
+   ============================================================================ */
+.visually-hidden-input {
+    display: none;
+}
+
+.btn-capture-mouse {
+    border-color: #38bdf8;
+    color: #7dd3fc;
+    font-weight: 700;
+}
+
+.multiplayer-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(9, 13, 22, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 4px 10px;
+    border-radius: 9px;
+}
+
+.mp-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+    flex-shrink: 0;
+}
+
+.mp-dot.online {
+    background: #22c55e;
+    box-shadow: 0 0 9px #22c55e;
+}
+
+.mp-online-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #86efac;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+.mp-nickname-input {
+    width: 98px;
+    background: rgba(20, 27, 45, 0.9);
+    border: 1px solid var(--border-subtle);
+    color: #f8fafc;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.mp-nickname-input:focus {
+    border-color: var(--accent-cyan);
+}
+
+.studio-btn.inventory-btn {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    border-color: rgba(251, 191, 36, 0.5);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+.god-height-badge {
+    background: rgba(14, 165, 233, 0.22);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    color: #7dd3fc;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ============================================================================
+   MODAL DE INVENTARIO ESTILO MINECRAFT (BLOQUES, SHADERS 1-BUFFER Y COLORES)
+   ============================================================================ */
+.inventory-modal-card {
+    width: min(980px, 95vw);
+    max-height: 88vh;
+}
+
+.inventory-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inventory-top-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.inventory-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.inv-tab-btn {
+    border: 1px solid var(--border-subtle);
+    background: rgba(15, 23, 42, 0.75);
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 13px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.inv-tab-btn:hover {
+    background: var(--bg-card-hover);
+    color: #ffffff;
+}
+
+.inv-tab-btn.active {
+    background: linear-gradient(135deg, #d97706, #0284c7);
+    border-color: #fbbf24;
+    color: #ffffff;
+}
+
+.inventory-slot-target {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.inventory-slot-target select {
+    background: #090d16;
+    color: #f8fafc;
+    border: 1px solid var(--border-highlight);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.inventory-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 10px;
+    max-height: 48vh;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.inv-item-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.14s ease;
+}
+
+.inv-item-card:hover {
+    border-color: #fbbf24;
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.inv-item-card.equipped {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+.inv-item-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 9px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    image-rendering: pixelated;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.inv-item-name {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #f8fafc;
+    text-align: center;
+    max-width: 112px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inv-item-tag {
+    font-size: 9.5px;
+    font-family: var(--font-mono);
+    color: #94a3b8;
+    background: rgba(9, 13, 22, 0.75);
+    padding: 2px 6px;
+    border-radius: 5px;
+}
+
+.inv-item-count {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    color: #fde047;
+}
+
+.inventory-hotbar-preview-wrap {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.inventory-hotbar-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
