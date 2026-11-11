@@ -51,10 +51,13 @@ async function uploadToFtp() {
             host: ftpHost,
             user: ftpUser,
             password: ftpPassword,
-            secure: false
+            secure: true,
+            secureOptions: { rejectUnauthorized: false }
         });
 
-        const remoteDir = '/shadercraft';
+        const rootList = await client.list('/');
+        const hasPublicHtml = rootList.some(it => it.name === 'public_html' && it.isDirectory);
+        const remoteDir = hasPublicHtml ? '/public_html/shadercraft' : '/shadercraft';
         const localPublicFolder = path.join(__dirname, '../public');
 
         if (fs.existsSync(localPublicFolder)) {
