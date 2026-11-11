@@ -55,9 +55,7 @@ async function uploadToFtp() {
             secureOptions: { rejectUnauthorized: false }
         });
 
-        const rootList = await client.list('/');
-        const hasPublicHtml = rootList.some(it => it.name === 'public_html' && it.isDirectory);
-        const remoteDir = hasPublicHtml ? '/public_html/shadercraft' : '/shadercraft';
+        const remoteDir = process.env.FTP_REMOTE_BASE || '/shadercraft';
         const localPublicFolder = path.join(__dirname, '../public');
 
         if (fs.existsSync(localPublicFolder)) {
