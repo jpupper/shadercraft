@@ -1,64 +1,56 @@
 #!/bin/bash
 
-# 1. LIMPIEZA DE CARACTERES ESPECIALES (CRLF)
-sed -i 's/\r$//' .env 2>/dev/null
-sed -i 's/\r$//' deploy_scripts/server_update.sh 2>/dev/null
-
-# 2. CARGAR VARIABLES DESDE .ENV
-if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
-else
-    echo "AVISO: Creando .env por defecto en el VPS para shadercraft..."
-    cat <<EOF > .env
-PORT=3255
-NODE_ENV=vps
-BASE_PATH=/shadercraft
-GITHUB_REPO=jpupper/shadercraft
-EOF
-    export $(grep -v '^#' .env | xargs)
-fi
-
-# Configuracion
-TOKEN=$(echo ${GITHUB_TOKEN:-""} | tr -d '\r')
-REPO=$(echo ${GITHUB_REPO:-"jpupper/shadercraft"} | tr -d '\r')
+# --- CONFIGURACION DEL PROYECTO ---
 APP_NAME="shadercraft"
-if [ -n "$TOKEN" ]; then
-    REPO_URL="https://$TOKEN@github.com/$REPO"
+APP_DIR="/root/$APP_NAME"
+BRANCH="main"
+
+mkdir -p "$APP_DIR"
+
+# Cargar variables de entorno si existen
+if [ -f "$APP_DIR/.env" ]; then
+    set -a
+    source "$APP_DIR/.env"
+    set +a
+fi
+
+GITHUB_REPO="jpupper/shadercraft"
+
+if [ -n "$GITHUB_TOKEN" ]; then
+    REPO_URL="https://$GITHUB_TOKEN@github.com/$GITHUB_REPO.git"
 else
-    REPO_URL="https://github.com/$REPO"
+    REPO_URL="https://github.com/$GITHUB_REPO.git"
 fi
 
 echo "------------------------------------------------"
-echo "DEPLOY: $APP_NAME (Repo: $REPO)"
+echo "DEPLOY: $APP_NAME (Repo: $GITHUB_REPO)"
 echo "------------------------------------------------"
 
-# 3. ACTUALIZACION DE GIT (Reset hard para asegurar que coincide con GitHub)
-if [ ! -d ".git" ]; then
+cd "$APP_DIR" || exit 1
+
+if [ ! -d "$APP_DIR/.git" ]; then
     echo "Clonando repositorio por primera vez..."
     git init
-    git remote add origin "$REPO_URL"
-    git fetch origin main
-    git checkout -f main
+    git branch -M $BRANCH
+    git remote add origin "$REPO_URL" || git remote set-url origin "$REPO_URL"
+    git fetch origin $BRANCH || git fetch https://github.com/$GITHUB_REPO.git $BRANCH
+    git checkout -f FETCH_HEAD || git checkout -b $BRANCH origin/$BRANCH
 else
-    echo "Actualizando repositorio..."
-    git remote set-url origin "$REPO_URL"
-    git fetch origin main
-    git reset --hard origin/main
+    echo "Actualizando codigo existente..."
+    git remote set-url origin "https://github.com/$GITHUB_REPO.git"
+    git fetch origin $BRANCH
+    git reset --hard origin/$BRANCH
 fi
 
-# 4. INSTALACION DE DEPENDENCIAS
 echo "Instalando dependencias..."
-npm install
+npm install --production
 
-# 5. REINICIO TOTAL DE PM2 (Borrar y Crear)
 echo "Reestableciendo instancia de PM2..."
-pm2 delete "$APP_NAME" 2>/dev/null
-pm2 start server.js --name "$APP_NAME"
+pm2 delete $APP_NAME 2>/dev/null || true
+PORT=3255 pm2 start server.js --name "$APP_NAME"
 pm2 save
 
 echo "------------------------------------------------"
 echo "DEPLOY FINALIZADO CON EXITO"
 echo "------------------------------------------------"
-pm2 list
-echo "------------------------------------------------"
-
+pm2 status $APP_NAME
